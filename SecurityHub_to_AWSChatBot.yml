@@ -157,7 +157,7 @@ Resources:
           - !Ref SNSTopicAWSChatBot
   AWSChatBotSubscription:
     Type: AWS::SNS::Subscription
-    Condition: noConfigureSlackChannelConfig
+      #    Condition: noConfigureSlackChannelConfig
     Properties: 
       Endpoint: https://global.sns-api.chatbot.amazonaws.com
       Protocol: HTTPS
