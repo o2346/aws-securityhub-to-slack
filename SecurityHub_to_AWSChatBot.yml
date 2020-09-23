@@ -184,6 +184,7 @@ Resources:
           Id: "OpsTopic"
   ChatBotManageIAMRole:
     Type: AWS::IAM::Role
+    Condition: noConfigureSlackChannelConfig
     Properties:
       AssumeRolePolicyDocument: 
         Version: "2012-10-17"
