@@ -4,40 +4,13 @@ Description: Deploys CustomAction in SecurityHub to enable sending findings to S
 #==================================================
 # Parameters
 #==================================================
-Parameters:
-  SlackWorkSpaceID:
-    Description: Slack workspace ID (Copy and Paste from AWS Chatbot Configured Clients Interface)
-    Type: String
-    MinLength: 9
-    MaxLength: 15
-    AllowedPattern: ^[a-zA-Z0-9_]*$
-    ConstraintDescription: |
-      Malformed Input Parameter: Environment must contain only upper and numbers. Length should be minimum of 9 characters and a maximum of 15 characters.
- 
-  SlackChannelID:
-    Description: Slack Channel ID
-    Type: String
-    MinLength: 9
-    MaxLength: 15
-    AllowedPattern: ^[a-zA-Z0-9_]*$
-    ConstraintDescription: |
-      Malformed Input Parameter: Environment must contain only upper and numbers. Length should be a minimum of 9 characters and a maximum of 15 characters.
-
+#Parameters:
   # CustomActionName:
   #   Description: Name of the Custom Action in SecurityHub
   #   Type: String
   #   AllowedPattern: ^[a-zA-Z0-9_]*$ 
   #   Default: Send_To_Slack
   #   #Default: 'Send To !Sub "${ChatApplication}"'
-
-  configureSlackChannel:
-    Type: String
-    AllowedValues: [ true, false ]
-    Default: true
-
-Conditions:
-    configureSlackChannelConfig: !Equals [ !Ref configureSlackChannel, true ]
-    noConfigureSlackChannelConfig: !Equals [ !Ref configureSlackChannel, false ]
 
 #==================================================
 # Resources
@@ -157,7 +130,6 @@ Resources:
           - !Ref SNSTopicAWSChatBot
   AWSChatBotSubscription:
     Type: AWS::SNS::Subscription
-      #    Condition: noConfigureSlackChannelConfig
     Properties: 
       Endpoint: https://global.sns-api.chatbot.amazonaws.com
       Protocol: HTTPS
@@ -182,28 +154,3 @@ Resources:
           Arn: 
             Ref: "SNSTopicAWSChatBot"
           Id: "OpsTopic"
-  ChatBotManageIAMRole:
-    Type: AWS::IAM::Role
-    Condition: noConfigureSlackChannelConfig
-    Properties:
-      AssumeRolePolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - 
-            Effect: "Allow"
-            Principal: 
-              Service: 
-                - "sns.amazonaws.com"
-            Action: 
-              - "sts:AssumeRole"
-  SlackChannelConfig:
-    Type: AWS::Chatbot::SlackChannelConfiguration
-    Condition: configureSlackChannelConfig
-    Properties: 
-      ConfigurationName: securityhubnotification
-      IamRoleArn: !GetAtt ChatBotManageIAMRole.Arn
-      LoggingLevel: NONE
-      SlackChannelId: !Ref SlackChannelID
-      SlackWorkspaceId: !Ref SlackWorkSpaceID
-      SnsTopicArns: 
-        - !Ref  SNSTopicAWSChatBot
